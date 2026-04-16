@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aharoni Imports & Exports | Global Logistics AI</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;800;900&family=Inter:wght@400;600;700;800;900&display=swap');
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            scroll-behavior: smooth; 
+        }
+
+        .rtl { 
+            direction: rtl; 
+            font-family: 'Heebo', sans-serif; 
+        }
+
+        .navy-bg { background-color: #1A2B45; }
+        .cyan-text { color: #00ADEF; }
+        .cyan-bg { background-color: #00ADEF; }
+        
+        .hero-section {
+            background: linear-gradient(to right, rgba(26, 43, 69, 0.9), rgba(26, 43, 69, 0.4)), 
+                        url('https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&q=80&w=1600');
+            background-size: cover; background-position: center;
+        }
+
+        .whatsapp-float {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 900;
+        }
+
+        .wa-btn-exec {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 24px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 800;
+            font-size: 13px;
+            text-transform: uppercase;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
+            text-decoration: none;
+            background-color: #1A2B45;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        .wa-btn-exec:hover { 
+            transform: translateX(-5px);
+            background-color: #00ADEF;
+        }
+
+        .ai-assistant-btn {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            z-index: 1000;
+            background: linear-gradient(135deg, #00ADEF, #1A2B45);
+            color: white;
+            padding: 16px;
+            border-radius: 50%;
+            box-shadow: 0 10px 30px rgba(0,173,239,0.4);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .ai-panel {
+            position: fixed;
+            bottom: 100px;
+            left: 30px;
+            width: 350px;
+            max-height: 550px;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            border: 2px solid #1A2B45;
+        }
+        .ai-panel.active { display: flex; }
+
+        .solid-input {
+            background-color: #1a2b45 !important;
+            color: #ffffff !important;
+            border: 2px solid #00ADEF !important;
+        }
+
+        .solid-output {
+            background-color: #ffffff !important;
+            color: #1a2b45 !important;
+            border: 3px solid #00ADEF !important;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .benefit-tag {
+            background: #f0fdf4;
+            color: #166534;
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.1);
+        }
+
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        .modal.active { display: flex; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800" id="site-root">
+
+    <!-- BOTÓN ASISTENTE AI -->
+    <div class="ai-assistant-btn" onclick="toggleAIPanel()">
+        <i class="fa-solid fa-sparkles text-2xl"></i>
+    </div>
+
+    <!-- PANEL ASISTENTE AI (CHAT PRINCIPAL) -->
+    <div id="aiPanel" class="ai-panel">
+        <div class="navy-bg p-4 text-white flex justify-between items-center border-b border-white/10">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-robot text-cyan-400"></i>
+                <span class="font-black text-xs uppercase tracking-widest">Aharoni AI Engine ✨</span>
+            </div>
+            <!-- Botón de Cierre Mejorado -->
+            <button onclick="toggleAIPanel()" class="hover:bg-red-500 w-8 h-8 rounded-full flex items-center justify-center transition-colors">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <div id="aiChatContent" class="flex-grow p-4 overflow-y-auto text-sm space-y-4 bg-slate-100 min-h-[300px]">
+            <div class="bg-white p-3 rounded-2xl border-2 border-slate-300 text-slate-800 font-bold shadow-sm">
+                ¡Hola! Soy tu asesor logístico. Describe tu proyecto y te ayudaré con la estrategia técnica. (Nota: Solo nuestras oficinas emiten cotizaciones oficiales).
+            </div>
+        </div>
+        <div class="p-4 border-t-2 border-slate-200 bg-white">
+            <div class="flex gap-2">
+                <input id="aiInput" type="text" placeholder="Escribe aquí..." class="flex-grow p-3 text-sm border-2 border-slate-300 rounded-lg outline-none focus:border-[#00ADEF] font-bold text-slate-800">
+                <button onclick="askGemini()" class="cyan-bg text-white p-3 rounded-lg hover:opacity-90 transition"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTONES WHATSAPP FLOTANTES -->
+    <div class="whatsapp-float">
+        <a id="wa-float-israel" href="https://wa.me/972547614487" target="_blank" class="wa-btn-exec">
+            <i class="fa-brands fa-whatsapp text-lg text-emerald-400"></i>
+            <span class="font-black">Soporte Israel</span>
+        </a>
+        <a id="wa-float-mexico" href="https://wa.me/525620153698" target="_blank" class="wa-btn-exec">
+            <i class="fa-brands fa-whatsapp text-lg text-emerald-400"></i>
+            <span class="font-black">Soporte México</span>
+        </a>
+    </div>
+
+    <!-- NAVEGACIÓN -->
+    <nav class="bg-white sticky top-0 z-50 border-b-2 border-slate-200 shadow-sm">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div class="navy-bg p-2.5 rounded-lg shadow-lg text-white flex items-center justify-center">
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <i class="fa-solid fa-ship text-[10px]"></i>
+                        <i class="fa-solid fa-plane text-[10px]"></i>
+                        <i class="fa-solid fa-box text-[10px]"></i>
+                        <i class="fa-solid fa-truck-fast text-[10px]"></i>
+                    </div>
+                </div>
+                <div>
+                    <span class="text-xl font-black block text-[#1A2B45] leading-none uppercase tracking-tight">AHARONI</span>
+                    <span class="text-[9px] font-bold text-[#00ADEF] uppercase tracking-[0.2em]">Imports & Exports</span>
+                </div>
+            </div>
+
+            <div class="hidden lg:flex items-center gap-8 font-black text-[10px] uppercase tracking-widest text-[#1A2B45]">
+                <a href="#servicios" class="hover:text-[#00ADEF] transition">Servicios</a>
+                <a href="#estrategia" class="hover:text-[#00ADEF] transition">Estrategia</a>
+                <a href="#faq" class="hover:text-[#00ADEF] transition">Preguntas</a>
+                <a href="#contacto" class="hover:text-[#00ADEF] transition">Contacto</a>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <select id="langSelector" onchange="changeLanguage(this.value)" class="bg-slate-100 text-[10px] font-black uppercase border-2 border-slate-200 rounded-lg px-2 py-2 outline-none">
+                    <option value="es">Español</option>
+                    <option value="he">עברית</option>
+                </select>
+                <button onclick="toggleAuthModal()" class="bg-[#1A2B45] text-white px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest hover:bg-[#00ADEF] transition-colors">Mi Cuenta</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <header class="hero-section min-h-[85vh] flex items-center text-white relative">
+        <div class="container mx-auto px-6">
+            <div class="max-w-3xl">
+                <div class="inline-block px-4 py-1.5 bg-[#00ADEF] text-[#1A2B45] rounded-full text-[10px] font-black uppercase tracking-widest mb-6 shadow-lg">Expertos en Israel - México</div>
+                <h1 class="text-5xl md:text-7xl font-black mb-6 leading-tight">LOGÍSTICA <br><span class="text-cyan-400">INTELIGENTE ✨</span></h1>
+                <p class="text-lg text-slate-100 mb-8 max-w-xl font-bold bg-black/20 p-4 rounded-xl backdrop-blur-sm">El puente estratégico más sólido entre Medio Oriente y América Latina, impulsado por tecnología de vanguardia.</p>
+                <div class="flex flex-wrap gap-4">
+                    <button onclick="toggleAIPanel()" class="cyan-bg text-[#1A2B45] px-10 py-5 rounded-2xl font-black text-sm hover:scale-105 transition shadow-2xl uppercase tracking-widest">
+                        Cotizar con IA ✨
+                    </button>
+                    <a href="#servicios" class="bg-white/10 backdrop-blur-md text-white border border-white/20 px-10 py-5 rounded-2xl font-black text-sm hover:bg-white/20 transition uppercase tracking-widest">Nuestros Servicios</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- SERVICIOS -->
+    <section id="servicios" class="py-24 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+                <div class="max-w-2xl">
+                    <h2 class="text-xs font-black text-[#00ADEF] uppercase tracking-[0.5em] mb-4">Portafolio Global</h2>
+                    <h3 class="text-4xl font-black text-[#1A2B45]">Soluciones <span class="cyan-text">Integrales</span> de Comercio</h3>
+                </div>
+                <div class="text-slate-400 text-sm font-medium italic">Expertos en gestión aduanera y transporte multimodal.</div>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="p-8 rounded-[2rem] bg-slate-50 border border-slate-100 card-hover transition-all group">
+                    <i class="fa-solid fa-ship text-3xl text-[#1A2B45] mb-6 group-hover:text-[#00ADEF] transition-colors"></i>
+                    <h4 class="text-xl font-black mb-4 uppercase">Transporte Marítimo</h4>
+                    <p class="text-slate-600 text-sm leading-relaxed">Operamos en los principales puertos de Israel (Haifa, Ashdod) y México (Veracruz, Manzanillo, Altamira).</p>
+                </div>
+                <div class="p-8 rounded-[2rem] bg-slate-50 border border-slate-100 card-hover transition-all group">
+                    <i class="fa-solid fa-plane-up text-3xl text-[#00ADEF] mb-6"></i>
+                    <h4 class="text-xl font-black mb-4 uppercase">Carga Aérea</h4>
+                    <p class="text-slate-600 text-sm leading-relaxed">Servicios urgentes y handling especial para mercancías de alto valor o perecederos desde Tel Aviv.</p>
+                </div>
+                <div class="p-8 rounded-[2rem] bg-slate-50 border border-slate-100 card-hover transition-all group">
+                    <i class="fa-solid fa-shield-halved text-3xl text-[#1A2B45] mb-6 group-hover:text-[#00ADEF] transition-colors"></i>
+                    <h4 class="text-xl font-black mb-4 uppercase">Gestión Aduanal</h4>
+                    <p class="text-slate-600 text-sm leading-relaxed">Liberación eficiente de mercancías cumpliendo con todas las normativas fiscales de ambos países.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ESTRATEGIA -->
+    <section id="estrategia" class="py-24 bg-slate-50">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-xs font-black text-[#00ADEF] uppercase tracking-[0.5em] mb-4">Optimización</h2>
+                <h3 class="text-4xl font-black text-[#1A2B45]">Modelos de Carga y <span class="cyan-text">Ahorro</span></h3>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+                <div class="border border-slate-200 p-8 rounded-[2.5rem] hover:border-[#00ADEF] transition-all bg-white group shadow-sm">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="w-16 h-16 bg-blue-50 text-[#00ADEF] rounded-2xl flex items-center justify-center text-3xl transition group-hover:bg-[#00ADEF] group-hover:text-white">
+                            <i class="fa-solid fa-boxes-stacked"></i>
+                        </div>
+                        <span class="benefit-tag">Máximo Ahorro PYME</span>
+                    </div>
+                    <h4 class="text-2xl font-black text-[#1A2B45] mb-4 uppercase">Carga Consolidada (LCL)</h4>
+                    <p class="text-slate-600 mb-6 text-sm leading-relaxed">Comparta el espacio de un contenedor con otros exportadores. Ideal para envíos pequeños que no llenan un contenedor completo.</p>
+                    <ul class="space-y-3 mb-8 text-xs font-bold text-slate-500 uppercase tracking-wide">
+                        <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> Paga solo por el volumen usado</li>
+                        <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> Salidas semanales programadas</li>
+                    </ul>
+                    <button onclick="fillAIConsult('Carga Consolidada')" class="text-xs font-bold text-[#00ADEF] underline decoration-2 underline-offset-4 uppercase">Consultar viabilidad con IA ✨</button>
+                </div>
+
+                <div class="border border-slate-200 p-8 rounded-[2.5rem] hover:border-[#1A2B45] transition-all bg-white group shadow-sm">
+                    <div class="flex justify-between items-start mb-6">
+                        <div class="w-16 h-16 bg-slate-900 text-white rounded-2xl flex items-center justify-center text-3xl">
+                            <i class="fa-solid fa-truck-container"></i>
+                        </div>
+                        <span class="benefit-tag bg-blue-50 text-blue-700">Alta Eficiencia</span>
+                    </div>
+                    <h4 class="text-2xl font-black text-[#1A2B45] mb-4 uppercase">Contenedor Completo (FCL)</h4>
+                    <p class="text-slate-600 mb-6 text-sm leading-relaxed">Uso exclusivo del contenedor para volúmenes altos. Mayor seguridad y rapidez al no requerir desconsolidación.</p>
+                    <ul class="space-y-3 mb-8 text-xs font-bold text-slate-500 uppercase tracking-wide">
+                        <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> Máximo control de mercancía</li>
+                        <li><i class="fa-solid fa-check text-emerald-500 mr-2"></i> Sellado de origen a destino</li>
+                    </ul>
+                    <button onclick="fillAIConsult('Contenedor Completo')" class="text-xs font-bold text-[#1A2B45] underline decoration-2 underline-offset-4 uppercase">Analizar costos FCL con IA ✨</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ASISTENTE DE MANIFIESTOS -->
+    <section class="py-24 bg-[#1A2B45]">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row gap-8">
+                <div class="md:w-1/2">
+                    <div class="inline-block px-4 py-1 bg-cyan-500 text-[#1A2B45] font-black rounded mb-4 text-xs">INPUT ADUANERO</div>
+                    <h3 class="text-4xl font-black mb-6 text-white uppercase italic">Asistente de <span class="text-cyan-400">Manifiestos</span></h3>
+                    <p class="text-white text-lg font-bold mb-6">Describe tus productos aquí. La IA los preparará para aduanas:</p>
+                    
+                    <textarea id="docInput" placeholder="EJEMPLO: 200 botellas de aceite de oliva prensado en frío de 500ml..." 
+                        class="w-full h-48 p-6 solid-input rounded-2xl outline-none focus:ring-4 focus:ring-cyan-500/50 text-lg font-medium mb-6 placeholder:text-slate-400"></textarea>
+                    
+                    <button onclick="translateDocs()" class="w-full cyan-bg text-[#1A2B45] px-10 py-6 rounded-2xl font-black text-lg uppercase tracking-widest hover:scale-[1.02] transition shadow-2xl">
+                        GENERAR TEXTO TÉCNICO <i class="fa-solid fa-bolt ml-2"></i>
+                    </button>
+                </div>
+                
+                <div class="md:w-1/2">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="inline-block px-4 py-1 bg-white text-[#1A2B45] font-black rounded text-xs">OUTPUT PROFESIONAL</div>
+                        <!-- Botón para limpiar/cerrar output -->
+                        <button onclick="clearOutput()" class="text-white/50 hover:text-white transition">
+                            <i class="fa-solid fa-trash-can mr-2"></i> <span class="text-[10px] font-black uppercase">Limpiar</span>
+                        </button>
+                    </div>
+                    <div id="docOutput" class="solid-output p-8 rounded-[2rem] min-h-[400px] flex flex-col relative">
+                        <div class="flex items-center gap-3 text-[#1A2B45] mb-6 font-black border-b-2 border-slate-200 pb-4 uppercase text-xs tracking-widest">
+                            <i class="fa-solid fa-file-invoice-dollar text-2xl text-cyan-500"></i>
+                            GENERADOR TÉCNICO
+                        </div>
+                        <div id="aiOutputText" class="text-[#1A2B45] font-bold text-lg leading-relaxed whitespace-pre-wrap italic">
+                            Los resultados aparecerán aquí después de procesar...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACTO DIRECTO -->
+    <section id="contacto" class="py-24 bg-slate-50">
+        <div class="container mx-auto px-6 text-center">
+            <h3 class="text-4xl font-black text-[#1A2B45] mb-12 uppercase tracking-tighter">Canales de <span class="text-cyan-500">Soporte</span></h3>
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <a href="https://wa.me/972547614487" class="bg-white p-10 rounded-3xl border-2 border-slate-200 flex flex-col items-center gap-4 transition hover:scale-105 shadow-xl hover:border-[#1A2B45]">
+                    <i class="fa-brands fa-whatsapp text-6xl text-emerald-500"></i>
+                    <span class="text-2xl font-black text-[#1A2B45] uppercase">Soporte Israel</span>
+                    <span class="text-lg font-bold bg-slate-100 px-6 py-2 rounded-full text-[#1A2B45]">+972 54-761-4487</span>
+                </a>
+                <a href="https://wa.me/525620153698" class="bg-white p-10 rounded-3xl border-2 border-slate-200 flex flex-col items-center gap-4 transition hover:scale-105 shadow-xl hover:border-[#1A2B45]">
+                    <i class="fa-brands fa-whatsapp text-6xl text-emerald-500"></i>
+                    <span class="text-2xl font-black text-[#1A2B45] uppercase">Soporte México</span>
+                    <span class="text-lg font-bold bg-slate-100 px-6 py-2 rounded-full text-[#1A2B45]">+52 56 2015 3698</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="navy-bg py-12 text-white border-t border-white/10">
+        <div class="container mx-auto px-6 text-center">
+            <div class="flex items-center justify-center gap-4 mb-8">
+                <div class="bg-white/10 p-2 rounded text-white flex items-center justify-center">
+                    <i class="fa-solid fa-ship text-sm"></i>
+                </div>
+                <div>
+                    <span class="text-lg font-black block leading-none uppercase tracking-tight">AHARONI</span>
+                    <span class="text-[8px] font-bold text-[#00ADEF] uppercase tracking-[0.2em]">Imports & Exports</span>
+                </div>
+            </div>
+            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.3em]">&copy; 2024 AHARONI IMPORTS & EXPORTS | ISRAEL - MÉXICO | TODOS LOS DERECHOS RESERVADOS</p>
+        </div>
+    </footer>
+
+    <!-- MODAL AUTH -->
+    <div id="authModal" class="modal">
+        <div class="bg-white p-10 rounded-[3rem] w-full max-w-md relative shadow-2xl">
+            <!-- Botón de cierre en Modal -->
+            <button onclick="toggleAuthModal()" class="absolute top-6 right-8 text-slate-300 hover:text-red-500 text-2xl transition"><i class="fa-solid fa-xmark"></i></button>
+            <div class="text-center mb-8">
+                <h3 class="text-2xl font-black text-[#1A2B45]">ACCESO CORPORATIVO</h3>
+            </div>
+            <div class="space-y-4">
+                <input type="email" placeholder="Email corporativo" class="w-full p-4 bg-slate-50 border-2 border-slate-200 rounded-xl outline-none focus:border-[#00ADEF] font-bold text-sm">
+                <button onclick="alert('Contacte por WhatsApp para obtener acceso.')" class="w-full navy-bg text-white font-black py-4 rounded-xl uppercase text-xs tracking-widest hover:bg-[#00ADEF] transition-all">Ingresar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const apiKey = "";
+        
+        function toggleAIPanel() { document.getElementById('aiPanel').classList.toggle('active'); }
+        function toggleAuthModal() { document.getElementById('authModal').classList.toggle('active'); }
+        
+        function clearOutput() {
+            document.getElementById('aiOutputText').innerHTML = "Los resultados aparecerán aquí después de procesar...";
+            document.getElementById('docInput').value = "";
+        }
+
+        function fillAIConsult(type) {
+            document.getElementById('aiPanel').classList.add('active');
+            document.getElementById('aiInput').value = `Necesito ayuda con una ${type} para... `;
+            document.getElementById('aiInput').focus();
+        }
+
+        async function fetchGemini(prompt, system) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                systemInstruction: { parts: [{ text: system }] }
+            };
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                return result.candidates?.[0]?.content?.parts?.[0]?.text || "Respuesta no disponible.";
+            } catch (e) { return "Error de conexión con el motor de IA."; }
+        }
+
+        async function askGemini() {
+            const input = document.getElementById('aiInput');
+            const chat = document.getElementById('aiChatContent');
+            const userText = input.value.trim();
+            if (!userText) return;
+
+            chat.innerHTML += `<div class="bg-blue-600 text-white p-3 rounded-2xl text-right ml-8 text-xs font-black shadow-md border-b-2 border-blue-700">${userText}</div>`;
+            input.value = "";
+            chat.scrollTop = chat.scrollHeight;
+
+            const sysInstruct = `Eres el experto logístico de Aharoni Imports & Exports. 
+            REGLA CRÍTICA: Bajo NINGUNA circunstancia des precios, presupuestos, tarifas numéricas o costos estimados. 
+            Si el usuario pregunta por costos, responde que solo nuestras oficinas emiten cotizaciones oficiales debido a la volatilidad del mercado. 
+            Indícales que utilicen los botones de WhatsApp para hablar con un agente humano. 
+            Enfócate solo en asesoría técnica, tipos de carga y rutas.`;
+
+            const response = await fetchGemini(userText, sysInstruct);
+            chat.innerHTML += `<div class="bg-white p-3 rounded-2xl border-2 border-slate-300 text-slate-900 font-bold shadow-sm">🤖 ${response}</div>`;
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        async function translateDocs() {
+            const input = document.getElementById('docInput').value.trim();
+            const outputText = document.getElementById('aiOutputText');
+            if (!input) return;
+
+            outputText.innerHTML = "<div class='text-blue-600 font-black'><i class='fa-solid fa-gear fa-spin'></i> PROCESANDO DATOS ADUANEROS...</div>";
+            
+            const systemPrompt = "Eres un experto en aduanas. Traduce descripciones de carga a inglés técnico profesional para Bill of Lading. Formato lista clara. NO DES PRECIOS.";
+            const response = await fetchGemini(input, systemPrompt);
+            outputText.innerHTML = response;
+        }
+
+        function changeLanguage(lang) {
+            document.body.classList.toggle('rtl', lang === 'he');
+        }
+    </script>
+</body>
+</html>
